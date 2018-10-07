@@ -5,9 +5,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sstream>
-#include <vector>
-
-typedef std::vector<char> BufferType;
 
 uint32_t GetDeviceBlockSize(int fd)
 {
@@ -33,9 +30,9 @@ uint64_t GetFileSize(int fd)
     return offset;
 }
 
-void WriteBlock(int fd, const BufferType& buffer, uint64_t offset)
+void WriteBlock(int fd, char* buffer, uint32_t blockSize, uint64_t offset)
 {
-    auto res = lseek64(fd, offset, SEEK_SET);
+    auto res = pwrite64(fd, buffer, blockSize, offset);
     if (res == -1)
     {
         std::stringstream ss;
@@ -46,24 +43,16 @@ void WriteBlock(int fd, const BufferType& buffer, uint64_t offset)
 
 void EraseBlocks(int fd, uint32_t blockSize, uint64_t blocksCount)
 {
-    off_t offset = lseek64(fd, 0, SEEK_SET);
-    if (offset == -1)
-    {
-        std::stringstream ss;
-        ss << "Can't seek to offset " << offset << ". Error = " << errno << std::endl;
-        throw std::runtime_error(ss.str());
-    }
-    BufferType buffer(blockSize);
+    char buffer[blockSize] __attribute__ ((__aligned__ (512))) = {0};
     for (uint64_t block = 0; block < blocksCount; ++block)
     {
-        WriteBlock(fd, buffer, block * blockSize);
+        WriteBlock(fd, buffer, blockSize, block * blockSize);
     }
 }
 
 uint64_t CheckBlocks(int fd, uint32_t blockSize, uint64_t blocksCount)
 {
-    BufferType buffer(blockSize);
-    auto pBuff = buffer.data();
+    char buffer[blockSize] __attribute__ ((__aligned__ (512))) = {0};
     off_t offset = 0;
     uint64_t normalSize = 0;
 
@@ -78,7 +67,7 @@ uint64_t CheckBlocks(int fd, uint32_t blockSize, uint64_t blocksCount)
     for (uint64_t block = 0; block < blocksCount; ++block)
     {
         offset = block * blockSize;
-        auto readedBytes = read(fd, pBuff, blockSize);
+        auto readedBytes = pread(fd, buffer, blockSize, offset);
         if (readedBytes == -1)
         {
             std::stringstream ss;
@@ -86,14 +75,14 @@ uint64_t CheckBlocks(int fd, uint32_t blockSize, uint64_t blocksCount)
             throw std::runtime_error(ss.str());
         }
 
-        auto& blockNum = *reinterpret_cast<uint64_t*>(pBuff);
+        auto& blockNum = *reinterpret_cast<uint64_t*>(buffer);
         if (blockNum)
         {
             std::cout << "Invalid mapping! " << block << " -> " << blockNum << std::endl;
             continue;
         }
-        blockNum = block;
-        WriteBlock(fd, buffer, offset);
+        blockNum = block + 1;
+        WriteBlock(fd, buffer, blockSize, offset);
         normalSize += blockSize;
     }
     return normalSize;
@@ -118,7 +107,7 @@ void CheckDev(const std::string& path)
     std::cout << "Blocks count = " << blocksCount << std::endl;
 
     std::cout << "Start erase all" << std::endl;
-    //EraseBlocks(fd, blockSize, blocksCount);
+    EraseBlocks(fd, blockSize, blocksCount);
     std::cout << "Erasing completed" << std::endl;
 
     std::cout << "Start checking blocks" << std::endl;
