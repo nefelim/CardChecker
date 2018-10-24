@@ -5,17 +5,30 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sstream>
+#include <cstring>
+
+#define ALLIGNED __attribute__ ((__aligned__ (512)))
+
+void ShowProgress(uint64_t currentValue, uint64_t maxValue, uint64_t& showedPercents)
+{
+    uint64_t currentPercents = currentValue * 100 / maxValue;
+    if (currentPercents != showedPercents)
+    {
+        std::cout << currentPercents << "%" << std::endl;
+        showedPercents = currentPercents;
+    }
+}
 
 uint32_t GetDeviceBlockSize(int fd)
 {
-    struct stat s = {0};
+    struct stat s = {};
     if (fstat(fd, &s))
     {
         std::stringstream ss;
         ss << "Can't get fstat for device. Error = " << errno << std::endl;
         throw std::runtime_error(ss.str());
     }
-    return s.st_blksize;
+    return static_cast<uint32_t>(s.st_blksize);
 }
 
 uint64_t GetFileSize(int fd)
@@ -27,10 +40,10 @@ uint64_t GetFileSize(int fd)
         ss << "Can't get file size. Error = " << errno << std::endl;
         throw std::runtime_error(ss.str());
     }
-    return offset;
+    return static_cast<uint64_t>(offset);
 }
 
-void WriteBlock(int fd, char* buffer, uint32_t blockSize, uint64_t offset)
+void WriteBlock(int fd, char* buffer, uint32_t blockSize, off_t offset)
 {
     auto res = pwrite64(fd, buffer, blockSize, offset);
     if (res == -1)
@@ -43,16 +56,20 @@ void WriteBlock(int fd, char* buffer, uint32_t blockSize, uint64_t offset)
 
 void EraseBlocks(int fd, uint32_t blockSize, uint64_t blocksCount)
 {
-    char buffer[blockSize] __attribute__ ((__aligned__ (512))) = {0};
+    char buffer[blockSize] ALLIGNED;
+    std::memset(buffer, 0, blockSize);
+    uint64_t showedPercents = 0;
     for (uint64_t block = 0; block < blocksCount; ++block)
     {
         WriteBlock(fd, buffer, blockSize, block * blockSize);
+        ShowProgress(block, blocksCount, showedPercents);
     }
 }
 
 uint64_t CheckBlocks(int fd, uint32_t blockSize, uint64_t blocksCount)
 {
-    char buffer[blockSize] __attribute__ ((__aligned__ (512))) = {0};
+    char buffer[blockSize] ALLIGNED;
+    std::memset(buffer, 0, blockSize);
     off_t offset = 0;
     uint64_t normalSize = 0;
 
@@ -64,7 +81,9 @@ uint64_t CheckBlocks(int fd, uint32_t blockSize, uint64_t blocksCount)
         throw std::runtime_error(ss.str());
     }
 
-    for (uint64_t block = 0; block < blocksCount; ++block)
+    uint64_t showedPercents = 0;
+
+    for (uint block = 0; block < blocksCount; ++block)
     {
         offset = block * blockSize;
         auto readedBytes = pread(fd, buffer, blockSize, offset);
@@ -84,6 +103,7 @@ uint64_t CheckBlocks(int fd, uint32_t blockSize, uint64_t blocksCount)
         blockNum = block + 1;
         WriteBlock(fd, buffer, blockSize, offset);
         normalSize += blockSize;
+        ShowProgress(block, blocksCount, showedPercents);
     }
     return normalSize;
 }
