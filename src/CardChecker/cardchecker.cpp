@@ -7,6 +7,7 @@
 #include <sstream>
 #include <cstring>
 #include <system_error>
+#include "cardchecker.h"
 
 #define ALLIGNED __attribute__ ((__aligned__ (512)))
 uint64_t g_blocksCount = 0; //1 Mb
@@ -99,13 +100,13 @@ uint64_t CheckBlocks(int fd, uint64_t blockSize, uint64_t blocksCount)
             throw std::system_error(errno, std::system_category(), ss.str());
         }
 
-        auto& blockNum = *reinterpret_cast<uint64_t*>(buffer);
-        if (blockNum)
+        uint64_t* blockNum = reinterpret_cast<uint64_t*>(buffer);
+        if (*blockNum)
         {
-            std::cout << "Invalid mapping! " << block << " -> " << blockNum << std::endl;
+            std::cout << "Invalid mapping! " << block << " -> " << *blockNum << std::endl;
             continue;
         }
-        blockNum = block + 1;
+        *blockNum = block + 1;
         WriteBlock(fd, buffer, blockSize, offset);
         normalSize += blockSize;        
     }
@@ -140,24 +141,4 @@ void CheckDev(const std::string& path)
     std::cout << "Checking completed" << std::endl;
     std::cout << "Normal size = " << normalSize << std::endl;
     close(fd);
-}
-
-int main(int argc, char *argv[])
-{
-    if (argc != 2)
-    {
-        std::cout << "Usage: " << argv[0] << " <pathname>" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    try
-    {
-        CheckDev(argv[1]);
-        return EXIT_SUCCESS;
-    }
-    catch(const std::exception& ex)
-    {
-        std::cout << "Error: " << ex.what() << std::endl;
-    }
-    return EXIT_FAILURE;
 }

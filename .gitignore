@@ -1,1 +1,8 @@
-/CMakeLists.txt.user
+/obj/
+/lib/
+/bin/
+/gen/
+/build*
+
+*.txt.user
+
