@@ -1,11 +1,9 @@
 #include <cstdio>
 #include "cardchecker.h"
 #include "filedevicechecker.h"
-#include "progresscon.h"
 
-void CheckDev(const std::string& path)
+void CheckDev(const std::string& path, IProgress* progress)
 {
-    auto progress = ProgressCon::CreateInstance();
-    FileDeviceChecker fd(progress.get());
+    FileDeviceChecker fd(progress);
     fd.CheckDev(path);
 }

@@ -1,4 +1,6 @@
 #pragma once
 #include <string>
 
-void CheckDev(const std::string& path);
+class IProgress;
+
+void CheckDev(const std::string& path, IProgress* progress);

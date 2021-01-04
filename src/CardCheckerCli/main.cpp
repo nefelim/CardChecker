@@ -1,4 +1,5 @@
 #include <iostream>
+#include "progresscon.h"
 #include "cardchecker.h"
 
 int main(int argc, char *argv[])
@@ -11,7 +12,8 @@ int main(int argc, char *argv[])
 
     try
     {
-        CheckDev(argv[1]);
+        auto progress = ProgressCon::CreateInstance();
+        CheckDev(argv[1], progress.get());
         return EXIT_SUCCESS;
     }
     catch(const std::exception& ex)

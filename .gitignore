@@ -2,7 +2,7 @@
 /lib/
 /bin/
 /gen/
-/build*
+/build-*
 
 *.txt.user
 

@@ -111,7 +111,7 @@ void FileDeviceChecker::CheckDev(const std::string& path)
     if (m_progress)
     {
         std::stringstream ss;
-        ss << "Real size is " << realSize << "b.";
+        ss << "Real size is " << realSize << "b." << std::endl;
         ss << "This is " << realSize * 100 / size << "% of the declared size";
         m_progress->ShowMessage(ss.str());
     }
