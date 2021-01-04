@@ -18,7 +18,7 @@ After a successful build, you can find a new file *./bin/Release/CardCheckerCli*
 + You must find path of your USB **DEVICE**. Usualy it is path similar to /dev/sd[a|b|c|...]
 + Run program *with root privilages*.
 ```
-sudo CardCheckerCli /dev/sdb
+sudo ./CardCheckerCli /dev/sdb
 ```
 
 (!) **All datas on this drive will be corrupted!!! Don't use this program, if you are unsure of your knowledge**
@@ -37,5 +37,5 @@ dd if=/dev/zero of=/tmp/test_file bs=100M count=1
 ```
 and run 'check' it
 ```
-CardCheckerCli /tmp/test_file
+./CardCheckerCli /tmp/test_file
 ```
