@@ -21,7 +21,7 @@ After a successful build, you can find a new file *./bin/Release/CardCheckerCli*
 sudo ./CardCheckerCli /dev/sdb
 ```
 
-(!) **All datas on this drive will be corrupted!!! Don't use this program, if you are unsure of your knowledge**
+:warning::warning::warning: **All datas on this drive will be corrupted!!! Don't use this program, if you are unsure of your knowledges**:warning::warning::warning:
 + After long time, if all ok, you can see text:
 ```
 Checking of blocks completed
