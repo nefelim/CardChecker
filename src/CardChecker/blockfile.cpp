@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <sys/statfs.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <system_error>
@@ -22,10 +23,20 @@ void BlockFile::OpenDevice(const std::string& path, int flags)
     }
 }
 
+struct statfs64 BlockFile::GetDeviceInfo() const
+{
+    struct statfs64 s = {};
+    if (::fstatfs64(m_fd, &s))
+    {
+        throw std::system_error(errno, std::system_category(), "Can't get statfs64 for device.");
+    }
+    return s;
+}
+
 uint32_t BlockFile::GetBlockSize()
 {
-    struct stat s = {};
-    if (::fstat(m_fd, &s))
+    struct stat64 s = {};
+    if (::fstat64(m_fd, &s))
     {
         throw std::system_error(errno, std::system_category(), "Can't get fstat for device.");
     }
@@ -53,7 +64,7 @@ void BlockFile::WriteBlock(char* buffer, uint64_t blockSize, off_t offset)
     }
 }
 
-void BlockFile::ReadBlock(char *buffer, uint64_t blockSize, off_t offset)
+void BlockFile::ReadBlock(char* buffer, uint64_t blockSize, off_t offset)
 {
     auto readedBytes = pread(m_fd, buffer, blockSize, offset);
     if (readedBytes == -1)

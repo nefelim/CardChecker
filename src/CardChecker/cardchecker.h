@@ -2,5 +2,6 @@
 #include <string>
 
 class IProgress;
+class IInputParams;
 
-void CheckDev(const std::string& path, IProgress* progress);
+void CheckDev(const IInputParams& inputParams, IProgress* progress);

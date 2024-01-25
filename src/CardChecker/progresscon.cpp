@@ -11,7 +11,7 @@ void ProgressCon::SetDescription(const std::string& description)
     std::cout << description << std::endl;
 }
 
-void ProgressCon::ShowMessage(const std::string &message) const
+void ProgressCon::ShowMessage(const std::string& message) const
 {
     std::cout << message << std::endl;
 }

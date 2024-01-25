@@ -2,7 +2,8 @@
 /lib/
 /bin/
 /gen/
-/build-*
+/build*
+/.vscode
 
 *.txt.user
 

@@ -18,4 +18,3 @@ private:
     void ShowError(const std::string& error) const override;
     void DrawProgress(int64_t currentPercents) const override;
 };
-

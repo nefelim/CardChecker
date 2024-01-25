@@ -1,5 +1,4 @@
-# Project name
-set(PACKAGE_NAME CardChecker)
+set(CMAKE_CXX_STANDARD 11)
 
 if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build, options are: Debug Release" FORCE)

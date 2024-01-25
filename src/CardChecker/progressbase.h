@@ -6,8 +6,7 @@ class ProgressBase : public IProgress
 {
 public:
     ProgressBase()
-        : m_maxValue()
-        , m_showedPercents()
+        : m_maxValue(), m_showedPercents()
     {
     }
 

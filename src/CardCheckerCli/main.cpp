@@ -1,24 +1,27 @@
 #include <iostream>
 #include "progresscon.h"
+#include "inputparams.h"
 #include "cardchecker.h"
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     if (argc != 2)
     {
-        std::cout << "Usage: " << argv[0] << " <path_to_block_device>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <path_to_block_device>" << std::endl;
         return EXIT_FAILURE;
     }
 
     try
     {
         auto progress = ProgressCon::CreateInstance();
-        CheckDev(argv[1], progress.get());
+        InputParams inputParams;
+        inputParams.SetPath(argv[1]);
+        CheckDev(inputParams, progress.get());
         return EXIT_SUCCESS;
     }
-    catch(const std::exception& ex)
+    catch (const std::exception& ex)
     {
-        std::cout << "Error: " << ex.what() << std::endl;
+        std::cerr << "Error: " << ex.what() << std::endl;
     }
     return EXIT_FAILURE;
 }
